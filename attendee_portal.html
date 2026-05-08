@@ -1,0 +1,953 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BPA Attendee Portal</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Segoe UI', Arial, sans-serif;
+    background: #FDF8F0;
+    color: #2C1810;
+    min-height: 100vh;
+    padding-bottom: 72px;
+  }
+
+  /* Header */
+  .header {
+    background: #8B1A1A;
+    color: #FDF8F0;
+    padding: 16px 20px 12px;
+    text-align: center;
+  }
+  .header h1 {
+    font-size: 18px;
+    font-weight: 600;
+    letter-spacing: 0.3px;
+    color: #F5D99A;
+  }
+  .header p {
+    font-size: 12px;
+    color: #E8C890;
+    margin-top: 2px;
+    opacity: 0.9;
+  }
+
+  /* Tab bar */
+  .tab-bar {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: #8B1A1A;
+    display: flex;
+    border-top: 2px solid #C96A12;
+    z-index: 100;
+  }
+  .tab-btn {
+    flex: 1;
+    background: none;
+    border: none;
+    color: #E8C890;
+    padding: 10px 4px 8px;
+    font-size: 10px;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    opacity: 0.7;
+    transition: opacity 0.15s;
+  }
+  .tab-btn.active {
+    color: #F5D99A;
+    opacity: 1;
+    border-top: 2px solid #C9A84C;
+    margin-top: -2px;
+  }
+  .tab-btn svg {
+    width: 22px;
+    height: 22px;
+  }
+
+  /* Content panels */
+  .panel { display: none; padding: 20px 16px; }
+  .panel.active { display: block; }
+
+  /* Cards */
+  .card {
+    background: #fff;
+    border: 1px solid #E8D5B0;
+    border-radius: 12px;
+    padding: 16px;
+    margin-bottom: 14px;
+  }
+  .card-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: #8B1A1A;
+    margin-bottom: 8px;
+  }
+
+  /* Section headings */
+  .section-label {
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    color: #C96A12;
+    margin: 18px 0 8px;
+  }
+
+  /* Search */
+  .search-box {
+    background: #fff;
+    border: 1.5px solid #C9A84C;
+    border-radius: 10px;
+    padding: 14px 16px;
+    margin-bottom: 16px;
+  }
+  .search-box label {
+    display: block;
+    font-size: 12px;
+    color: #8B4513;
+    margin-bottom: 6px;
+    font-weight: 600;
+  }
+  .search-row {
+    display: flex;
+    gap: 8px;
+  }
+  .search-input {
+    flex: 1;
+    border: 1px solid #D4B896;
+    border-radius: 8px;
+    padding: 10px 12px;
+    font-size: 15px;
+    background: #FDF8F0;
+    color: #2C1810;
+    outline: none;
+  }
+  .search-input:focus {
+    border-color: #8B1A1A;
+    background: #fff;
+  }
+  .btn-primary {
+    background: #8B1A1A;
+    color: #F5D99A;
+    border: none;
+    border-radius: 8px;
+    padding: 10px 18px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+  }
+  .btn-primary:active { opacity: 0.85; }
+
+  /* Results */
+  .no-results {
+    text-align: center;
+    padding: 30px 20px;
+    color: #8B6A4A;
+  }
+  .no-results .icon { font-size: 36px; margin-bottom: 10px; }
+  .no-results p { font-size: 14px; line-height: 1.5; }
+
+  .event-card {
+    border-left: 4px solid #C96A12;
+    padding-left: 12px;
+    margin-bottom: 14px;
+  }
+  .event-name { font-size: 14px; font-weight: 600; color: #8B1A1A; }
+  .event-meta { font-size: 12px; color: #6B5040; margin-top: 2px; }
+  .badge {
+    display: inline-block;
+    font-size: 11px;
+    padding: 2px 8px;
+    border-radius: 20px;
+    margin-top: 4px;
+    font-weight: 600;
+  }
+  .badge-ritwik { background: #F5D99A; color: #8B1A1A; }
+  .badge-suvasini { background: #FDDCCA; color: #8B3A0A; }
+  .badge-general { background: #EAF0E8; color: #2D5A1A; }
+
+  .checkin-list { margin-top: 8px; }
+  .checkin-item {
+    font-size: 12px;
+    color: #4A3828;
+    padding: 3px 0;
+    border-bottom: 1px dotted #E8D5B0;
+    display: flex;
+    justify-content: space-between;
+  }
+  .checkin-item:last-child { border-bottom: none; }
+
+  .donation-row {
+    font-size: 12px;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    padding: 6px 0;
+    border-bottom: 1px dotted #E8D5B0;
+  }
+  .donation-row:last-child { border-bottom: none; }
+  .donation-purpose { color: #4A3828; max-width: 60%; }
+  .donation-amount { font-weight: 700; color: #2D5A1A; }
+  .status-confirmed { color: #2D5A1A; font-size: 10px; }
+  .status-pending { color: #8B6A12; font-size: 10px; }
+
+  .total-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px 0 0;
+    margin-top: 8px;
+    border-top: 2px solid #C9A84C;
+    font-weight: 700;
+    font-size: 15px;
+    color: #8B1A1A;
+  }
+
+  /* Schedule */
+  .event-header-card {
+    background: linear-gradient(135deg, #8B1A1A 0%, #6B1010 100%);
+    border-radius: 12px;
+    padding: 18px 16px;
+    margin-bottom: 16px;
+    color: #F5D99A;
+  }
+  .event-header-card h2 {
+    font-size: 15px;
+    font-weight: 700;
+    line-height: 1.4;
+    margin-bottom: 6px;
+  }
+  .event-header-card .venue {
+    font-size: 12px;
+    color: #E8C890;
+    line-height: 1.5;
+  }
+  .event-header-card .dates {
+    font-size: 13px;
+    color: #C9A84C;
+    margin-top: 6px;
+    font-weight: 600;
+  }
+
+  .day-header {
+    background: #C96A12;
+    color: #FDF8F0;
+    border-radius: 8px;
+    padding: 8px 14px;
+    font-size: 13px;
+    font-weight: 700;
+    margin: 14px 0 8px;
+  }
+
+  .session-block {
+    background: #fff;
+    border: 1px solid #E8D5B0;
+    border-radius: 10px;
+    padding: 12px 14px;
+    margin-bottom: 8px;
+  }
+  .session-time {
+    font-size: 12px;
+    font-weight: 700;
+    color: #8B1A1A;
+    margin-bottom: 6px;
+  }
+  .session-item {
+    font-size: 13px;
+    color: #2C1810;
+    padding: 3px 0 3px 14px;
+    position: relative;
+    line-height: 1.5;
+  }
+  .session-item::before {
+    content: '';
+    position: absolute;
+    left: 4px;
+    top: 9px;
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: #C9A84C;
+  }
+
+  /* Upcoming events */
+  .upcoming-event {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    padding: 10px 0;
+    border-bottom: 1px solid #E8D5B0;
+  }
+  .upcoming-event:last-child { border-bottom: none; }
+  .upcoming-event-name { font-size: 13px; font-weight: 600; color: #8B1A1A; }
+  .upcoming-event-date { font-size: 12px; color: #6B5040; margin-top: 2px; }
+  .upcoming-event-venue { font-size: 11px; color: #8B7060; margin-top: 2px; }
+
+  /* Sponsorships */
+  .sponsor-card {
+    background: #fff;
+    border: 1px solid #E8D5B0;
+    border-radius: 10px;
+    padding: 14px;
+    margin-bottom: 10px;
+  }
+  .sponsor-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+  }
+  .sponsor-name { font-size: 14px; font-weight: 600; color: #2C1810; }
+  .sponsor-amount { font-size: 16px; font-weight: 700; color: #8B1A1A; }
+  .btn-row { display: flex; gap: 8px; }
+  .btn-donate {
+    flex: 1;
+    background: #8B1A1A;
+    color: #F5D99A;
+    border: none;
+    border-radius: 8px;
+    padding: 9px 10px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    text-align: center;
+  }
+  .btn-donate:active { opacity: 0.85; }
+  .btn-zelle {
+    flex: 1;
+    background: #4A2B8B;
+    color: #E8D5F5;
+    border: none;
+    border-radius: 8px;
+    padding: 9px 10px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    text-align: center;
+  }
+  .btn-zelle:active { opacity: 0.85; }
+
+  /* Zelle popup */
+  .zelle-popup {
+    display: none;
+    background: #F0EaF8;
+    border: 1px solid #C9B8E8;
+    border-radius: 10px;
+    padding: 12px;
+    margin-top: 8px;
+    font-size: 13px;
+    color: #2C1060;
+  }
+  .zelle-popup.visible { display: block; }
+  .zelle-popup strong { display: block; margin-bottom: 4px; color: #4A2B8B; }
+
+  /* Donation form */
+  .donation-form-wrap {
+    display: none;
+    background: #FFF8EE;
+    border: 2px solid #C9A84C;
+    border-radius: 12px;
+    padding: 16px;
+    margin-top: 16px;
+  }
+  .donation-form-wrap.visible { display: block; }
+  .form-title {
+    font-size: 15px;
+    font-weight: 700;
+    color: #8B1A1A;
+    margin-bottom: 14px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .form-close {
+    background: none;
+    border: none;
+    font-size: 20px;
+    color: #8B1A1A;
+    cursor: pointer;
+    line-height: 1;
+  }
+  .form-field { margin-bottom: 12px; }
+  .form-field label {
+    display: block;
+    font-size: 12px;
+    font-weight: 600;
+    color: #6B3A1A;
+    margin-bottom: 4px;
+  }
+  .form-field input,
+  .form-field select {
+    width: 100%;
+    border: 1px solid #D4B896;
+    border-radius: 8px;
+    padding: 9px 12px;
+    font-size: 14px;
+    background: #fff;
+    color: #2C1810;
+    outline: none;
+  }
+  .form-field input:focus,
+  .form-field select:focus { border-color: #8B1A1A; }
+  .btn-submit {
+    width: 100%;
+    background: #C96A12;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    padding: 12px;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    margin-top: 4px;
+  }
+  .btn-submit:active { opacity: 0.85; }
+
+  .tax-note {
+    background: #EFF6E8;
+    border: 1px solid #C0D8A8;
+    border-radius: 8px;
+    padding: 12px;
+    font-size: 12px;
+    color: #3A5A2A;
+    line-height: 1.6;
+    margin-top: 16px;
+  }
+
+  /* About */
+  .about-hero {
+    background: #8B1A1A;
+    border-radius: 12px;
+    padding: 20px 16px;
+    text-align: center;
+    margin-bottom: 16px;
+  }
+  .about-hero h2 { color: #F5D99A; font-size: 16px; margin-bottom: 6px; }
+  .about-hero p { color: #E8C890; font-size: 12px; line-height: 1.6; }
+  .info-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 10px 0;
+    border-bottom: 1px solid #E8D5B0;
+    font-size: 13px;
+  }
+  .info-row:last-child { border-bottom: none; }
+  .info-label { color: #8B6A4A; font-weight: 600; min-width: 70px; font-size: 12px; }
+  .info-value { color: #2C1810; flex: 1; }
+  .info-value a { color: #8B1A1A; text-decoration: none; font-weight: 600; }
+
+  /* Toast */
+  .toast {
+    position: fixed;
+    bottom: 84px;
+    left: 50%;
+    transform: translateX(-50%) translateY(20px);
+    background: #2D5A1A;
+    color: #fff;
+    padding: 12px 20px;
+    border-radius: 10px;
+    font-size: 13px;
+    font-weight: 600;
+    opacity: 0;
+    transition: opacity 0.3s, transform 0.3s;
+    z-index: 200;
+    white-space: nowrap;
+    pointer-events: none;
+  }
+  .toast.show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>Bhaskara Prakasha Ashram</h1>
+  <p>Attendee Portal</p>
+</div>
+
+<!-- Tab 1: My Records -->
+<div class="panel active" id="panel-records">
+  <div class="search-box">
+    <label>Look up your records</label>
+    <div class="search-row">
+      <input class="search-input" id="lookup-input" type="text" placeholder="Email or phone number" autocomplete="off" />
+      <button class="btn-primary" onclick="doLookup()">Search</button>
+    </div>
+  </div>
+  <div id="lookup-results"></div>
+</div>
+
+<!-- Tab 2: Program Schedule -->
+<div class="panel" id="panel-schedule">
+  <div class="event-header-card">
+    <h2>Bay Area MahÄ Rudram and Åata Caá¹á¸Ä« MahÄyajÃ±am</h2>
+    <div class="venue">SanÄtana Dharma KendrÄ<br>3102 Landess Avenue, San Jose, CA 95132</div>
+    <div class="dates">May 29th 3 PM â May 31st 2 PM, 2026</div>
+  </div>
+
+  <div class="day-header">Friday, May 29</div>
+
+  <div class="session-block">
+    <div class="session-time">3:00 PM</div>
+    <div class="session-item">GhatasthÄpanam, PÅ«rvÄnga PÅ«jÄ</div>
+    <div class="session-item">Raká¹£Ä Bandhanam, MahÄ Sankalpam</div>
+    <div class="session-item">ÅrÄ« DurgÄ SaptaÅati PÄrÄyaá¹ams (108)</div>
+    <div class="session-item">MangalÄrati, MahÄprasÄdam</div>
+  </div>
+
+  <div class="day-header">Saturday, May 30</div>
+
+  <div class="session-block">
+    <div class="session-time">6:30 AM â 12:00 Noon</div>
+    <div class="session-item">MahanyÄsa sahita ÅrÄ« Rudra Japam</div>
+    <div class="session-item">Rudra archanÄ, Ashtottara SuvÄsini PÅ«jÄ</div>
+    <div class="session-item">MangalÄrati, MahÄprasÄdam</div>
+  </div>
+
+  <div class="session-block">
+    <div class="session-time">4:00 PM</div>
+    <div class="session-item">Åata Caá¹á¸Ä« Homam, KanyÄ PÅ«jÄ, Vatuka PÅ«jÄ</div>
+  </div>
+
+  <div class="session-block">
+    <div class="session-time">8:00 PM</div>
+    <div class="session-item">MahÄ PoornÄhuti, MangalÄrati, MahÄprasÄdam</div>
+  </div>
+
+  <div class="day-header">Sunday, May 31</div>
+
+  <div class="session-block">
+    <div class="session-time">8:00 AM</div>
+    <div class="session-item">MahÄ Rudram Homam (121 Ahutis)</div>
+    <div class="session-item">MahÄ PoornÄhuti, VasordhÄrÄ</div>
+    <div class="session-item">Dampati PujÄ, AbhiÅekam, MangalÄrati</div>
+    <div class="session-item">MahÄprasÄdam</div>
+  </div>
+
+  <div class="section-label">Upcoming Events</div>
+  <div class="card" id="upcoming-events-list">
+    <div style="font-size:13px;color:#8B6A4A;text-align:center;padding:10px 0;">Loading upcoming events...</div>
+  </div>
+</div>
+
+<!-- Tab 3: Support BPA -->
+<div class="panel" id="panel-support">
+  <div style="font-size:15px;font-weight:700;color:#8B1A1A;margin-bottom:4px;">Sponsorship Opportunities</div>
+  <div style="font-size:12px;color:#6B5040;margin-bottom:14px;">Your support sustains sacred yajnas and Vedic learning.</div>
+
+  <div id="sponsorship-list"></div>
+
+  <!-- Donation recording form (shared, shown below list) -->
+  <div class="donation-form-wrap" id="donation-form-wrap">
+    <div class="form-title">
+      Record My Donation
+      <button class="form-close" onclick="closeDonationForm()">&#x2715;</button>
+    </div>
+    <div class="form-field">
+      <label>Your Name</label>
+      <input type="text" id="don-name" placeholder="Full name" />
+    </div>
+    <div class="form-field">
+      <label>Email</label>
+      <input type="email" id="don-email" placeholder="your@email.com" />
+    </div>
+    <div class="form-field">
+      <label>Amount ($)</label>
+      <input type="number" id="don-amount" placeholder="Amount" min="1" />
+    </div>
+    <div class="form-field">
+      <label>Purpose</label>
+      <input type="text" id="don-purpose" placeholder="Purpose of donation" />
+    </div>
+    <div class="form-field">
+      <label>Payment Method</label>
+      <select id="don-method">
+        <option value="PayPal">PayPal</option>
+        <option value="Venmo">Venmo</option>
+        <option value="Zelle">Zelle</option>
+        <option value="Cash">Cash</option>
+        <option value="Check">Check</option>
+      </select>
+    </div>
+    <button class="btn-submit" onclick="submitDonation()">Submit Donation Record</button>
+  </div>
+
+  <div class="tax-note">
+    <strong style="display:block;margin-bottom:4px;color:#2D5A1A;">Tax Deductible</strong>
+    BPA is a 501(c)(3) organization (Tax ID: 82-1628468). Kindly notify us at <a href="mailto:donate2bpa@gmail.com" style="color:#2D5A1A;font-weight:700;">donate2bpa@gmail.com</a> after your donation.
+  </div>
+</div>
+
+<!-- Tab 4: About BPA -->
+<div class="panel" id="panel-about">
+  <div class="about-hero">
+    <h2>Bhaskara Prakasha Ashram</h2>
+    <p>A registered not-for-profit 501(c)(3) charitable organization dedicated to the teaching of ancient Vedic and Tantric texts.</p>
+  </div>
+
+  <div class="card">
+    <div class="info-row">
+      <span class="info-label">Tax ID</span>
+      <span class="info-value">82-1628468</span>
+    </div>
+    <div class="info-row">
+      <span class="info-label">Website</span>
+      <span class="info-value"><a href="https://www.bpasrm.org" target="_blank">www.bpasrm.org</a></span>
+    </div>
+    <div class="info-row">
+      <span class="info-label">Donate</span>
+      <span class="info-value"><a href="https://bhaskaraprakasha.org/donate" target="_blank">bhaskaraprakasha.org/donate</a></span>
+    </div>
+    <div class="info-row">
+      <span class="info-label">Email</span>
+      <span class="info-value"><a href="mailto:donate2bpa@gmail.com">donate2bpa@gmail.com</a></span>
+    </div>
+    <div class="info-row">
+      <span class="info-label">Zelle</span>
+      <span class="info-value">+1 415 619 2788<br><span style="color:#6B5040;font-size:12px;">donate2bpa@gmail.com</span></span>
+    </div>
+  </div>
+
+  <div class="tax-note">
+    Donations to Bhaskara Prakasha Ashram are tax-deductible to the extent allowed by law. Please retain your payment confirmation for tax records.
+  </div>
+</div>
+
+<!-- Tab Bar -->
+<div class="tab-bar">
+  <button class="tab-btn active" id="tab-records" onclick="switchTab('records')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/>
+    </svg>
+    My Records
+  </button>
+  <button class="tab-btn" id="tab-schedule" onclick="switchTab('schedule')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>
+    </svg>
+    Schedule
+  </button>
+  <button class="tab-btn" id="tab-support" onclick="switchTab('support')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M12 21C12 21 3 14 3 8a5 5 0 0 1 9-3 5 5 0 0 1 9 3c0 6-9 13-9 13z"/>
+    </svg>
+    Support
+  </button>
+  <button class="tab-btn" id="tab-about" onclick="switchTab('about')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><circle cx="12" cy="16" r="0.5" fill="currentColor"/>
+    </svg>
+    About
+  </button>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// âââ Utilities ââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
+
+function lsGet(key) {
+  try { return JSON.parse(localStorage.getItem(key) || 'null'); } catch(e) { return null; }
+}
+function lsSet(key, val) {
+  try { localStorage.setItem(key, JSON.stringify(val)); return true; } catch(e) { return false; }
+}
+
+function showToast(msg, isError) {
+  var t = document.getElementById('toast');
+  t.textContent = msg;
+  t.style.background = isError ? '#8B1A1A' : '#2D5A1A';
+  t.classList.add('show');
+  setTimeout(function(){ t.classList.remove('show'); }, 3000);
+}
+
+function fmtDate(iso) {
+  if (!iso) return '';
+  var d = new Date(iso);
+  if (isNaN(d)) return iso;
+  return d.toLocaleDateString('en-US', { month:'short', day:'numeric', year:'numeric' });
+}
+
+function fmtTime(iso) {
+  if (!iso) return '';
+  var d = new Date(iso);
+  if (isNaN(d)) return iso;
+  return d.toLocaleTimeString('en-US', { hour:'numeric', minute:'2-digit', hour12:true });
+}
+
+// âââ Tab switching âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
+
+function switchTab(name) {
+  ['records','schedule','support','about'].forEach(function(n) {
+    document.getElementById('panel-'+n).classList.toggle('active', n === name);
+    document.getElementById('tab-'+n).classList.toggle('active', n === name);
+  });
+  if (name === 'schedule') loadUpcomingEvents();
+}
+
+// âââ Tab 1: Lookup âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
+
+document.getElementById('lookup-input').addEventListener('keydown', function(e){
+  if (e.key === 'Enter') doLookup();
+});
+
+function normalize(s) {
+  return (s || '').trim().toLowerCase().replace(/[\s\-\(\)\.]/g,'');
+}
+
+function doLookup() {
+  var raw = document.getElementById('lookup-input').value.trim();
+  if (!raw) return;
+  var q = normalize(raw);
+  var el = document.getElementById('lookup-results');
+
+  var events = lsGet('yajÃ±a_events_v1') || [];
+  var donations = lsGet('yajÃ±a_donations_v1') || [];
+
+  // Find matching attendees across all events
+  var matched = []; // { event, attendee, checkins }
+  events.forEach(function(ev) {
+    var attendees = lsGet('yajÃ±a_att_' + ev.id) || [];
+    var checkins = lsGet('yajÃ±a_ci_' + ev.id) || [];
+    attendees.forEach(function(att) {
+      var emailMatch = normalize(att.email) === q;
+      var phoneMatch = normalize(att.phone) === q;
+      if (emailMatch || phoneMatch) {
+        var myCIs = checkins.filter(function(ci){ return ci.attendeeId === att.id; });
+        matched.push({ event: ev, attendee: att, checkins: myCIs });
+      }
+    });
+  });
+
+  // Find donations by email
+  var attEmail = '';
+  var attName = '';
+  if (matched.length > 0) {
+    attEmail = normalize(matched[0].attendee.email);
+    attName = matched[0].attendee.name || '';
+  }
+  var myDonations = donations.filter(function(d){
+    return normalize(d.attendeeEmail) === q ||
+           normalize(d.attendeeEmail) === attEmail ||
+           normalize(d.attendeeName) === normalize(attName);
+  });
+
+  if (matched.length === 0 && myDonations.length === 0) {
+    el.innerHTML = '<div class="no-results">'
+      + '<div class="icon">&#128591;</div>'
+      + '<p><strong>No records found.</strong><br>Please contact the desk for assistance.</p>'
+      + '</div>';
+    return;
+  }
+
+  var html = '';
+
+  if (matched.length > 0) {
+    html += '<div class="section-label">Events Attended</div>';
+    matched.forEach(function(m) {
+      var typeLabel = '';
+      var typeCls = 'badge-general';
+      var t = (m.attendee.type || '').toLowerCase();
+      if (t.includes('ritwik') || t.includes('ritvic')) { typeLabel = 'Ritwik'; typeCls = 'badge-ritwik'; }
+      else if (t.includes('suvasini') || t.includes('suvÄsini')) { typeLabel = 'Suvasini'; typeCls = 'badge-suvasini'; }
+      else { typeLabel = m.attendee.type || 'General'; typeCls = 'badge-general'; }
+
+      var dateStr = '';
+      if (m.event.startDate) dateStr = fmtDate(m.event.startDate);
+      if (m.event.endDate && m.event.endDate !== m.event.startDate) dateStr += ' â ' + fmtDate(m.event.endDate);
+
+      html += '<div class="card"><div class="event-card">'
+        + '<div class="event-name">' + esc(m.event.name || 'Event') + '</div>'
+        + (dateStr ? '<div class="event-meta">' + dateStr + '</div>' : '')
+        + (m.event.venue ? '<div class="event-meta">' + esc(m.event.venue) + '</div>' : '')
+        + '<span class="badge ' + typeCls + '">' + esc(typeLabel) + '</span>'
+        + '</div>';
+
+      if (m.checkins.length > 0) {
+        html += '<div class="section-label" style="margin-top:10px;">Check-ins</div>'
+          + '<div class="checkin-list">';
+        m.checkins.forEach(function(ci) {
+          html += '<div class="checkin-item">'
+            + '<span>' + esc(ci.session || ci.sessionName || 'Session') + '</span>'
+            + '<span>' + (ci.timestamp ? fmtTime(ci.timestamp) : '') + '</span>'
+            + '</div>';
+        });
+        html += '</div>';
+      } else {
+        html += '<div style="font-size:12px;color:#8B6A4A;margin-top:8px;">No check-ins recorded yet.</div>';
+      }
+      html += '</div>';
+    });
+  }
+
+  if (myDonations.length > 0) {
+    var total = myDonations.reduce(function(s,d){ return s + parseFloat(d.amount||0); }, 0);
+    html += '<div class="section-label">Donations</div><div class="card">';
+    myDonations.forEach(function(d) {
+      html += '<div class="donation-row">'
+        + '<div class="donation-purpose">'
+          + '<div>' + esc(d.purpose || 'Donation') + '</div>'
+          + '<div style="color:#8B6A4A;font-size:11px;">' + esc(d.date || '') + ' &middot; ' + esc(d.method || '') + '</div>'
+          + '<div class="' + (d.status==='confirmed'?'status-confirmed':'status-pending') + '">'
+          + (d.status === 'confirmed' ? '&#10003; Confirmed' : '&#9679; Pending verification') + '</div>'
+        + '</div>'
+        + '<div class="donation-amount">$' + parseFloat(d.amount||0).toLocaleString('en-US', {minimumFractionDigits:0}) + '</div>'
+        + '</div>';
+    });
+    html += '<div class="total-row"><span>Total Donated</span><span>$' + total.toLocaleString('en-US', {minimumFractionDigits:0}) + '</span></div>'
+      + '</div>';
+  }
+
+  el.innerHTML = html;
+}
+
+function esc(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// âââ Tab 2: Upcoming Events ââââââââââââââââââââââââââââââââââââââââââââââââââ
+
+function loadUpcomingEvents() {
+  var el = document.getElementById('upcoming-events-list');
+  var events = lsGet('yajÃ±a_events_v1') || [];
+  var today = new Date();
+  today.setHours(0,0,0,0);
+  var upcoming = events.filter(function(ev){
+    if (!ev.startDate) return false;
+    return new Date(ev.startDate) >= today;
+  }).sort(function(a,b){ return new Date(a.startDate) - new Date(b.startDate); });
+
+  if (upcoming.length === 0) {
+    el.innerHTML = '<div style="font-size:13px;color:#8B6A4A;text-align:center;padding:10px 0;">No upcoming events found in the system.</div>';
+    return;
+  }
+  var html = '';
+  upcoming.forEach(function(ev) {
+    var dateStr = fmtDate(ev.startDate);
+    if (ev.endDate && ev.endDate !== ev.startDate) dateStr += ' â ' + fmtDate(ev.endDate);
+    html += '<div class="upcoming-event">'
+      + '<div>'
+        + '<div class="upcoming-event-name">' + esc(ev.name || 'Event') + '</div>'
+        + '<div class="upcoming-event-date">' + dateStr + '</div>'
+        + (ev.venue ? '<div class="upcoming-event-venue">' + esc(ev.venue) + '</div>' : '')
+      + '</div>'
+      + '</div>';
+  });
+  el.innerHTML = html;
+}
+
+// âââ Tab 3: Sponsorships ââââââââââââââââââââââââââââââââââââââââââââââââââââââ
+
+var sponsorships = [
+  { name: 'MahÄ Rudram Homam', amount: 5001 },
+  { name: 'Åata Caá¹á¸Ä« Homam', amount: 5001 },
+  { name: 'AnnadÄnam', amount: 3001 },
+  { name: 'á¹tvik & ÄcÄrya Daká¹£iá¹Ä', amount: 1001 },
+  { name: 'Rudra Japam', amount: 501 },
+  { name: 'Flowers', amount: 251 }
+];
+
+(function buildSponsorships() {
+  var el = document.getElementById('sponsorship-list');
+  var html = '';
+  sponsorships.forEach(function(s, i) {
+    html += '<div class="sponsor-card" id="sc-'+i+'">'
+      + '<div class="sponsor-header">'
+        + '<div class="sponsor-name">' + esc(s.name) + '</div>'
+        + '<div class="sponsor-amount">$' + s.amount.toLocaleString() + '</div>'
+      + '</div>'
+      + '<div class="btn-row">'
+        + '<button class="btn-donate" onclick="openPayPal('+i+')">Donate via PayPal/Venmo</button>'
+        + '<button class="btn-zelle" onclick="toggleZelle('+i+')">Send via Zelle</button>'
+      + '</div>'
+      + '<div class="zelle-popup" id="zelle-'+i+'">'
+        + '<strong>Send via Zelle</strong>'
+        + '<div>&#128222; +1 415 619 2788</div>'
+        + '<div>&#9993; donate2bpa@gmail.com</div>'
+        + '<div style="margin-top:8px;color:#6B4A9A;font-size:12px;">After sending, tap "Record my donation" below to log your contribution.</div>'
+        + '<button style="margin-top:10px;background:#4A2B8B;color:#E8D5F5;border:none;border-radius:8px;padding:8px 14px;font-size:12px;font-weight:600;cursor:pointer;width:100%;" onclick="openDonationForm(\''+esc(s.name)+'\','+s.amount+')">Record my donation &rarr;</button>'
+      + '</div>'
+      + '</div>';
+  });
+  el.innerHTML = html;
+})();
+
+function openPayPal(idx) {
+  var s = sponsorships[idx];
+  window.open('https://bhaskaraprakasha.org/donate', '_blank');
+  setTimeout(function(){ openDonationForm(s.name, s.amount); }, 400);
+}
+
+function toggleZelle(idx) {
+  var el = document.getElementById('zelle-'+idx);
+  var wasVisible = el.classList.contains('visible');
+  // Close all
+  document.querySelectorAll('.zelle-popup').forEach(function(z){ z.classList.remove('visible'); });
+  if (!wasVisible) el.classList.add('visible');
+}
+
+function openDonationForm(purpose, amount) {
+  var wrap = document.getElementById('donation-form-wrap');
+  document.getElementById('don-purpose').value = purpose || '';
+  document.getElementById('don-amount').value = amount || '';
+  document.getElementById('don-name').value = '';
+  document.getElementById('don-email').value = '';
+  document.getElementById('don-method').value = 'PayPal';
+  wrap.classList.add('visible');
+  wrap.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function closeDonationForm() {
+  document.getElementById('donation-form-wrap').classList.remove('visible');
+}
+
+function submitDonation() {
+  var name = document.getElementById('don-name').value.trim();
+  var email = document.getElementById('don-email').value.trim();
+  var amount = parseFloat(document.getElementById('don-amount').value);
+  var purpose = document.getElementById('don-purpose').value.trim();
+  var method = document.getElementById('don-method').value;
+
+  if (!name) { showToast('Please enter your name.', true); return; }
+  if (!email || !email.includes('@')) { showToast('Please enter a valid email.', true); return; }
+  if (!amount || amount <= 0) { showToast('Please enter a valid amount.', true); return; }
+  if (!purpose) { showToast('Please enter the donation purpose.', true); return; }
+
+  var donation = {
+    id: 'don_' + Date.now(),
+    eventId: '',
+    attendeeName: name,
+    attendeeEmail: email,
+    amount: amount,
+    purpose: purpose,
+    date: new Date().toISOString().split('T')[0],
+    method: method,
+    status: 'pending',
+    notes: ''
+  };
+
+  var existing = lsGet('yajÃ±a_donations_v1') || [];
+  existing.push(donation);
+  var ok = lsSet('yajÃ±a_donations_v1', existing);
+
+  if (ok) {
+    closeDonationForm();
+    showToast('Donation recorded! Thank you for your generosity.');
+  } else {
+    showToast('Could not save â storage unavailable. Please note your donation manually.', true);
+  }
+}
+</script>
+
+</body>
+</html>
